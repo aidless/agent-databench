@@ -1,0 +1,20 @@
+{"id": "t01", "question": "How many matches are in this dataset?", "answer": 20, "kind": "int", "tol": 0.01}
+{"id": "t02", "question": "Mean wheat_harvest across all teams", "answer": 50.63, "kind": "float", "tol": 0.01}
+{"id": "t03", "question": "Mean wheat_harvest for team red", "answer": 58.27, "kind": "float", "tol": 0.01}
+{"id": "t04", "question": "Mean wheat_harvest for team blue", "answer": 42.99, "kind": "float", "tol": 0.01}
+{"id": "t05", "question": "Difference in mean wheat_harvest, red minus blue", "answer": 15.28, "kind": "float", "tol": 0.01}
+{"id": "t06", "question": "Win rate of team red (fraction between 0 and 1)", "answer": 0.9, "kind": "float", "tol": 0.01}
+{"id": "t07", "question": "Win rate of team blue (fraction between 0 and 1)", "answer": 0.3, "kind": "float", "tol": 0.01}
+{"id": "t08", "question": "Median corn_harvest across all matches", "answer": 21.55, "kind": "float", "tol": 0.01}
+{"id": "t09", "question": "Mean corn_harvest in matches that were LOST", "answer": 24.94, "kind": "float", "tol": 0.01}
+{"id": "t10", "question": "Mean corn_harvest in matches that were WON", "answer": 20.04, "kind": "float", "tol": 0.01}
+{"id": "t11", "question": "Correlation (Pearson) between seed_count and wheat_harvest, rounded to 2 decimals", "answer": 0.99, "kind": "float", "tol": 0.01}
+{"id": "t12", "question": "Which team has the higher mean wheat_harvest? answer 'red' or 'blue'", "answer": "red", "kind": "str", "tol": 0.01}
+{"id": "t13", "question": "Total beds_built across all matches", "answer": 131.0, "kind": "int", "tol": 0.01}
+{"id": "t14", "question": "Mean seed_count per bed built (total seeds / total beds)", "answer": 2.15, "kind": "float", "tol": 0.01}
+{"id": "t15", "question": "Match id with the highest wheat_harvest", "answer": 17, "kind": "int", "tol": 0.01}
+{"id": "t16", "question": "Wheat harvest of match 7", "answer": 55.1, "kind": "float", "tol": 0.01}
+{"id": "t17", "question": "Number of matches where wheat_harvest > 50", "answer": 9, "kind": "int", "tol": 0.01}
+{"id": "t18", "question": "Mean wheat_harvest for matches with exactly 7 beds built", "answer": 52.78, "kind": "float", "tol": 0.01}
+{"id": "t19", "question": "Sum of corn_harvest for team blue matches that were won", "answer": 70.8, "kind": "float", "tol": 0.05}
+{"id": "t20", "question": "Does mean corn_harvest go up or down with team red? answer 'up' or 'down' comparing red's mean corn_harvest vs blue's mean corn_harvest (answer 'up' if red is higher)", "answer": "down", "kind": "str", "tol": 0.01}

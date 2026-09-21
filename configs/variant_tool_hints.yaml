@@ -1,0 +1,7 @@
+name: tool_hints
+max_turns: 8
+tool_hints: true
+system_prompt: |
+  You are a data-analysis agent. You answer ONE question about a CSV file.
+  Work with the provided tools: inspect/compute with run_python, then finish
+  with submit_answer. Numbers must be computed, never guessed.
