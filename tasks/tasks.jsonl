@@ -1,20 +1,20 @@
-{"id": "t01", "question": "How many matches are in this dataset?", "answer": 20, "kind": "int", "tol": 0.01}
-{"id": "t02", "question": "Mean wheat_harvest across all teams", "answer": 50.63, "kind": "float", "tol": 0.01}
-{"id": "t03", "question": "Mean wheat_harvest for team red", "answer": 58.27, "kind": "float", "tol": 0.01}
-{"id": "t04", "question": "Mean wheat_harvest for team blue", "answer": 42.99, "kind": "float", "tol": 0.01}
-{"id": "t05", "question": "Difference in mean wheat_harvest, red minus blue", "answer": 15.28, "kind": "float", "tol": 0.01}
-{"id": "t06", "question": "Win rate of team red (fraction between 0 and 1)", "answer": 0.9, "kind": "float", "tol": 0.01}
-{"id": "t07", "question": "Win rate of team blue (fraction between 0 and 1)", "answer": 0.3, "kind": "float", "tol": 0.01}
-{"id": "t08", "question": "Median corn_harvest across all matches", "answer": 21.55, "kind": "float", "tol": 0.01}
-{"id": "t09", "question": "Mean corn_harvest in matches that were LOST", "answer": 24.94, "kind": "float", "tol": 0.01}
-{"id": "t10", "question": "Mean corn_harvest in matches that were WON", "answer": 20.04, "kind": "float", "tol": 0.01}
-{"id": "t11", "question": "Correlation (Pearson) between seed_count and wheat_harvest, rounded to 2 decimals", "answer": 0.99, "kind": "float", "tol": 0.01}
-{"id": "t12", "question": "Which team has the higher mean wheat_harvest? answer 'red' or 'blue'", "answer": "red", "kind": "str", "tol": 0.01}
-{"id": "t13", "question": "Total beds_built across all matches", "answer": 131.0, "kind": "int", "tol": 0.01}
-{"id": "t14", "question": "Mean seed_count per bed built (total seeds / total beds)", "answer": 2.15, "kind": "float", "tol": 0.01}
-{"id": "t15", "question": "Match id with the highest wheat_harvest", "answer": 17, "kind": "int", "tol": 0.01}
-{"id": "t16", "question": "Wheat harvest of match 7", "answer": 55.1, "kind": "float", "tol": 0.01}
-{"id": "t17", "question": "Number of matches where wheat_harvest > 50", "answer": 9, "kind": "int", "tol": 0.01}
-{"id": "t18", "question": "Mean wheat_harvest for matches with exactly 7 beds built", "answer": 52.78, "kind": "float", "tol": 0.01}
-{"id": "t19", "question": "Sum of corn_harvest for team blue matches that were won", "answer": 70.8, "kind": "float", "tol": 0.05}
-{"id": "t20", "question": "Does mean corn_harvest go up or down with team red? answer 'up' or 'down' comparing red's mean corn_harvest vs blue's mean corn_harvest (answer 'up' if red is higher)", "answer": "down", "kind": "str", "tol": 0.01}
+{"id": "t01", "question": "How many games are in this dataset?", "answer": 40, "kind": "int", "tol": 0.01}
+{"id": "t02", "question": "Mean final money for seat a", "answer": 102850.88, "kind": "float", "tol": 0.01}
+{"id": "t03", "question": "Mean final money for seat b", "answer": 104064.88, "kind": "float", "tol": 0.01}
+{"id": "t04", "question": "Mean money difference, seat a minus seat b", "answer": -1214.0, "kind": "float", "tol": 0.01}
+{"id": "t05", "question": "Median final money for seat a", "answer": 99737.0, "kind": "float", "tol": 0.01}
+{"id": "t06", "question": "How many games did seat a win? (winner column says 'a')", "answer": 17, "kind": "int", "tol": 0.01}
+{"id": "t07", "question": "How many games ended in a tie? (winner column 'tie')", "answer": 0, "kind": "int", "tol": 0.01}
+{"id": "t08", "question": "Win rate of seat a (fraction between 0 and 1, 2 decimals)", "answer": 0.42, "kind": "float", "tol": 0.01}
+{"id": "t09", "question": "Highest single-game money across BOTH seats", "answer": 169991.0, "kind": "float", "tol": 0.5}
+{"id": "t10", "question": "Mean pass-only turns for seat a (column pass_turns_a)", "answer": 7.3, "kind": "float", "tol": 0.01}
+{"id": "t11", "question": "Mean pass-only turns for seat b", "answer": 9.47, "kind": "float", "tol": 0.01}
+{"id": "t12", "question": "Total pass-only turns across both seats all games", "answer": 671.0, "kind": "int", "tol": 0.01}
+{"id": "t13", "question": "Mean active turns for seat a (column act_turns_a)", "answer": 712.7, "kind": "float", "tol": 0.01}
+{"id": "t14", "question": "Correlation (Pearson) between pass_turns_a and money_a, 2 decimals", "answer": -0.16, "kind": "float", "tol": 0.01}
+{"id": "t15", "question": "Largest absolute money margin in one game", "answer": 21657.0, "kind": "float", "tol": 0.01}
+{"id": "t16", "question": "Mean absolute money margin", "answer": 4850.5, "kind": "float", "tol": 0.01}
+{"id": "t17", "question": "How many games did seat a finish above $100,000?", "answer": 20, "kind": "int", "tol": 0.01}
+{"id": "t18", "question": "How many games had seat a pass-only turns above 5?", "answer": 21, "kind": "int", "tol": 0.01}
+{"id": "t19", "question": "Mean seed value of the games", "answer": 1077115946.58, "kind": "float", "tol": 1.0}
+{"id": "t20", "question": "Which seat has the higher mean money overall? answer 'a' or 'b'", "answer": "b", "kind": "str", "tol": 0.01}
