@@ -3,3 +3,4 @@ __pycache__/
 *.pyc
 .env
 sandbox_ws/
+.pytest_cache/
