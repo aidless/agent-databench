@@ -35,6 +35,23 @@ question ──> loop.py（消息状态机, max_turns 封顶）
         submit_answer ──> 终止, scoring.py 程序化判分
 ```
 
+## 目录结构
+
+```
+agent-databench/
+├── agent_databench/        # 核心包：loop.py(状态机) sandbox.py(进程级约束)
+│   │                       #   scoring.py(程序化判分) tools.py(工具注册) llm.py(LLM 适配)
+├── tasks/
+│   ├── build_games_from_episodes.py  # 官方 episode 转储 → data/games.csv
+│   └── build_tasks.py                # CSV → tasks.jsonl（答案由脚本现场计算）
+├── tasks/tasks.jsonl       # 20 个带标准答案的任务
+├── configs/                # base.yaml（对照）/ variant_tool_hints.yaml（实验）
+├── data/games.csv          # 40 局前十对局（CC0 转储展平）
+├── results/                # 运行结果 jsonl（每行含 llm 名，fake 行可识别）
+├── tests/                  # pytest：管道端到端 / 判分拒绝错误答案 / 沙箱四断言
+└── run.py                  # 入口：--fake 管道自检 / --config 真跑
+```
+
 ## 快速开始
 
 ```bash
@@ -46,6 +63,31 @@ cp .env.example .env                          # 填任意 OpenAI 兼容端点
 .venv/bin/python run.py --config configs/base.yaml
 .venv/bin/python run.py --config configs/variant_tool_hints.yaml
 ```
+
+## 测试
+
+```bash
+.venv/bin/python -m pytest tests/ -q        # 7 项全部通过（2026-11-01 基线）
+```
+
+测试覆盖：20 任务集的存在性、`--fake` 管道端到端、判分对错误答案的拒绝、
+`read_file` 越权逃逸拦截、沙箱超时/截断/脱敏/正常计算。测试不依赖网络与模型，
+无 `.env` 也能跑。
+
+## 证明什么 / 不证明什么
+
+**证明什么**：手写 tool-calling 循环 + 进程级沙箱，能在 20 个带标准答案的
+CSV 分析任务上端到端跑通判分管道；A/B 配置差异（`base` vs `tool_hints`）
+可归因到 prompt 层；`--fake` 管道回放证明 loop/沙箱/判分/报告接线正确。
+
+**不证明什么**：
+- 未跑真实 LLM 对比表（`results/` 只有 `base-fake.jsonl`，是管道回放）——本
+  README 与仓库**不含**任何"模型能力通过率"数字，能力声明需另跑真模型再写。
+- 沙箱是**进程级**约束（超时/截断/脱敏），**不是**安全边界（无 seccomp/容器）：
+  防失控刷爆会话够用，防恶意代码不够用。
+- 标准答案由脚本从数据现场计算，但数据本身只取 40 局前十对局（非全量转储），
+  结论不外推到整场 Kaggle episode 集。
+- 所有"通过率/轮数/token 成本"指标只对该任务集有效，不是通用 agent 能力度量。
 
 ## 诚实性约束（评测纪律）
 
@@ -64,6 +106,20 @@ cp .env.example .env                          # 填任意 OpenAI 兼容端点
 | 数值对但差 10 倍 | DictReader 列全是字符串，模型忘了 cast | tool_hints 变体专治这个，A/B 见真章 |
 | 幻觉列名 | 没先 read_file 就盲写代码 | 系统 prompt 要求首轮必须 inspect |
 | 统计脚本把每局全记成"有动作" | episode 动作是嵌套结构 `{farmer:[], hands:[[]], market:[]}`，扁平比较漏掉 list 套 list | 递归展平后再判 PASS；测试用真实局结构 |
+
+## 复算（数字从哪来）
+
+仓库内所有数字**当场算，不引外部账本**。逐项复算命令：
+
+| 数字 | 复算命令 | 来源 |
+|---|---|---|
+| 40 局前十对局 CSV | `.venv/bin/python tasks/build_games_from_episodes.py 40` | Kaggle 官方 CC0 episode 转储（2026-09-19） |
+| 20 个标准答案任务 | `.venv/bin/python tasks/build_tasks.py` | 从 `data/games.csv` 现场计算 |
+| 20 项管道回放全过 | `.venv/bin/python run.py --fake` | `results/base-fake.jsonl`（20 行，`llm: fake`） |
+| 7 项测试全过 | `.venv/bin/python -m pytest tests/ -q` | `tests/` |
+
+示例：`results/base-fake.jsonl` 第 1 行 `t01`，gold=40.0，submitted="40"，判分
+`score_answer` 在 `tol=0.01` 下通过（`tests/test_pipeline.py` 的同款断言）。
 
 ## 待办
 
