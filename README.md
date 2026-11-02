@@ -64,6 +64,21 @@ cp .env.example .env                          # 填任意 OpenAI 兼容端点
 .venv/bin/python run.py --config configs/variant_tool_hints.yaml
 ```
 
+## Benchmark (offline pipeline verification)
+
+`benchmarks/bench_pipeline.py` runs the real test suite and checks the committed
+`--fake` replay result — no model, no network:
+
+```bash
+python benchmarks/bench_pipeline.py   # RESULT: PASS
+```
+
+It verifies the 7-test suite and that `results/base-fake.jsonl` holds **20/20**
+passed across 20 distinct tasks, every row marked `llm: fake`. This is the honest
+claim the harness can make: the plumbing (loop/sandbox/scoring/report) verifies
+end-to-end on 20 standard-answer tasks, and no capability number leaks into a
+claim (see `PREREG.md` §5).
+
 ## 测试
 
 ```bash
