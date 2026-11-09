@@ -5,9 +5,9 @@
   python3 run.py --config configs/base.yaml --fake     # plumbing check, offline
   python3 run.py ... --limit 3                         # quick subset
 
-Fake mode replays scripted answers: it validates wiring (loop, sandbox,
-scoring, reporting) and says NOTHING about model capability. Results carry
-the llm name so a fake row can never masquerade as a real one.
+Fake mode replays scripted answers: it validates wiring (loop, tool subprocess,
+scoring, reporting) and says nothing about model capability. Results carry
+llm "fake" and a note so a fake row cannot be read as a model score.
 """
 import argparse
 import json
@@ -57,10 +57,13 @@ def main():
         ok = score_answer(task, episode["answer"])
         after = llm.usage
         usage = {k: after[k] - before[k] for k in after}
-        rows.append({"task_id": task["id"], "llm": llm.name, "config": cfg["name"],
-                     "gold": task["answer"], "submitted": episode["answer"],
-                     "passed": ok, "turns": episode["turns"], "status": episode["status"],
-                     **usage})
+        row = {"task_id": task["id"], "llm": llm.name, "config": cfg["name"],
+               "gold": task["answer"], "submitted": episode["answer"],
+               "passed": ok, "turns": episode["turns"], "status": episode["status"],
+               **usage}
+        if args.fake:
+            row["note"] = "plumbing only; not a model score"
+        rows.append(row)
         mark = "PASS" if ok else "FAIL"
         print(f"[{mark}] {task['id']:>4}  turns={episode['turns']}  "
               f"gold={task['answer']!r} got={episode['answer']!r}")

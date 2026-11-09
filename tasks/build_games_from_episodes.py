@@ -1,16 +1,16 @@
 #!/usr/bin/env python3
-"""Flatten official episode dumps (read-only) into data/games.csv.
+"""Flatten a local episode dump into data/games.csv.
 
-Source: ~/下载/kagg_decode/external/eps_top10/*.json  (Kaggle CC0 episode dump,
-publicly released 2026-09-19). Columns are computed HERE, fresh — this demo's
-numbers are never copied from any competition ledger.
+The dump is not in this repository. Pass its directory on the command line.
+Offline runs use the committed data/games.csv and do not execute this script.
+Column values are computed here. This file does not record an upstream
+license or release date, because the dump is not here to check.
 """
+import argparse
 import csv
 import json
 import sys
 from pathlib import Path
-
-EPISODES = Path.home() / "下载/kagg_decode/external/eps_top10"
 
 
 def _flatten_cmds(a) -> list[str]:
@@ -57,11 +57,23 @@ def flatten(path: Path) -> dict:
     }
 
 
-def main():
-    n = int(sys.argv[1]) if len(sys.argv) > 1 else 40
-    files = sorted(EPISODES.glob("*.json"))[:n]
+def main(argv=None):
+    ap = argparse.ArgumentParser(description=__doc__)
+    ap.add_argument(
+        "episodes_dir",
+        type=Path,
+        help="Directory of episode *.json files. Not shipped in this repo.",
+    )
+    ap.add_argument(
+        "-n",
+        type=int,
+        default=40,
+        help="Max files to read, after sorting by name (default: 40).",
+    )
+    args = ap.parse_args(argv)
+    files = sorted(args.episodes_dir.glob("*.json"))[: args.n]
     if not files:
-        sys.exit(f"no episodes under {EPISODES}")
+        sys.exit(f"no episode json files under {args.episodes_dir}")
     out = Path(__file__).resolve().parent.parent / "data" / "games.csv"
     rows = [flatten(p) for p in files]
     with open(out, "w", newline="") as f:

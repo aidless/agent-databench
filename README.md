@@ -2,72 +2,79 @@
 
 [![CI](https://github.com/aidless/agent-databench/actions/workflows/ci.yml/badge.svg)](https://github.com/aidless/agent-databench/actions/workflows/ci.yml)
 
-一个**带评测 harness 的 CSV 数据分析 agent**：手写 tool-calling 循环（不依赖
-agent 框架），20 个有标准答案的任务，每次改动都能量出「通过率 / 轮数 / token
-成本」三个数。
+A tool-calling agent answers one question about a CSV by running Python and submitting a string.
+The repo holds 20 questions with answers computed from a committed file of 40 data rows, and a harness that logs pass/fail, turns, and token counts.
+That is a measurement rig for this loop. It is not a general test of data analysis, and it does not include a live model score.
 
-## 数据出处
+The CI badge is the offline pytest job in `.github/workflows/ci.yml`. It is not a model score. This repo has no package metadata and no publish workflow.
 
-`data/games.csv` = 本地 flatten 的 **Kaggle 官方 CC0 episode 转储**（2026-09-19
-公开发布，取 40 局前十对局）。列：双方席位、终局 money、胜者、纯 PASS 回合数、
-有动作回合数、seed。重生成：
+## Offline path
 
-```bash
-.venv/bin/python tasks/build_games_from_episodes.py 40   # 只读源目录
-```
-
-所有派生数字在本仓脚本内现场计算，不引用任何外部账本（评测答案同理，见下）。
-
-
-## 为什么不用 LangChain
-
-因为框架把我最想测的东西藏起来了：状态怎么管、失败怎么回喂、成本花在第几轮。
-harness 的产出不是"能跑的 demo"，而是**配置对比表**（见 `results/`）——同一
-任务集，`configs/base.yaml` vs `configs/variant_tool_hints.yaml`，差异全部
-归因到 prompt 层，没有框架噪声。
-
-## 架构
-
-```
-question ──> loop.py（消息状态机, max_turns 封顶）
-                │  llm.chat(messages, tools)
-                ▼
-        run_python ──> sandbox.py  超时 15s / 输出截断 4KB / 剥离含
-        read_file  ──> 仅 data/    KEY|TOKEN|SECRET 的环境变量 / cwd 锁定
-        submit_answer ──> 终止, scoring.py 程序化判分
-```
-
-## 快速开始
+No API key. Inputs are the committed files `data/games.csv` (40 data rows) and `tasks/tasks.jsonl` (20 questions).
 
 ```bash
-python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
-.venv/bin/python tasks/build_games_from_episodes.py 40  # 可选：从官方转储重建 CSV
-.venv/bin/python tasks/build_tasks.py        # 任务+标准答案由脚本从 CSV 算出
-.venv/bin/python run.py --fake --limit 3     # 离线管道自检（不考模型能力）
-cp .env.example .env                          # 填任意 OpenAI 兼容端点
+python3 -m venv .venv
+.venv/bin/pip install -r requirements.txt
+.venv/bin/python -m pytest tests/ -q
+.venv/bin/python run.py --fake
+```
+
+`python -m pytest tests/ -q` is the CI command (Python 3.12). The suite runs every gold task through `FakeLLM`, checks that `tasks/tasks.jsonl` matches `tasks/build_tasks.py` on the committed CSV, and pins the judge holes in `FAILURE_MODES.md`. It does not call a model.
+
+`run.py --fake` writes `results/base-fake.jsonl`. Every row has `"llm": "fake"` and `"note": "plumbing only; not a model score"`, because `FakeLLM` submits the gold string on turn 2. A pass in that file means the loop, tool dispatch, and scorer are wired. Prompt and completion tokens in that file are 0 because the fake client reports no usage.
+
+`requirements.txt` is pyyaml and pytest. The offline path does not import `openai` or pandas.
+
+## Live path
+
+This path needs an OpenAI-compatible endpoint. No live jsonl is checked in. Do not write a pass rate, a turn count, or a token cost into this README until the jsonl from that command is in the repo, with the model id and the date.
+
+```bash
+.venv/bin/pip install -r requirements-live.txt
+cp .env.example .env
 .venv/bin/python run.py --config configs/base.yaml
 .venv/bin/python run.py --config configs/variant_tool_hints.yaml
 ```
 
-## 诚实性约束（评测纪律）
+`.env` needs `LLM_API_KEY`. `LLM_BASE_URL` and `LLM_MODEL` are optional. If `LLM_MODEL` is unset or blank, `agent_databench/llm.py` sends `deepseek-chat`. A blank `LLM_BASE_URL` leaves the client on the SDK default base URL. `requirements-live.txt` adds `openai` and `pandas`. The harness does not import pandas. It is installed so code the model writes can import it.
 
-- `--fake` 是**管道回放**：脚本直接提交标准答案，仅验证 loop/沙箱/判分接线，
-  结果行带 `llm: fake` 标记，不允许出现在能力声明里。
-- 标准答案由 `tasks/build_tasks.py` 从数据现场计算，不是手抄——数据变了
-  评测集自动跟着变。
-- 沙箱是**进程级**约束（超时/截断/脱敏），不是安全边界（无 seccomp/容器）。
-  防"agent 失控刷爆会话"够用，防恶意代码不够用，边界写在这。
+`configs/variant_tool_hints.yaml` appends three prompt lines about string columns, empty stdout, and state that does not persist between `run_python` calls. There is no measured difference between `base` and `tool_hints` in this repo.
 
-## 失败模式手册（边跑边补）
+## What a score does not prove
 
-| 症状 | 根因 | 修法 |
+- A row with `"llm": "fake"`, including `results/base-fake.jsonl`, does not measure a model.
+- A live `passed: true` means the submitted string met `score_answer`. The judge does not read the transcript, so it does not mean the method was right.
+- `run_python` starts in a temp copy of `data/`. A relative open of `tasks/tasks.jsonl` fails. An absolute path can still read the answer key, `.env`, and any other file the OS user can read. A live pass does not prove the model computed the answer.
+- These 20 questions are aggregations on one CSV: counts, means, one correlation, one seat label. There is no held-out set and no repeated trials, so there is no variance. A pass rate here is not a ranking of data-analysis skill.
+- Token totals are the API usage object summed across calls. If that object is missing, the total stays 0. That is not a price.
+
+The checked examples are in [FAILURE_MODES.md](FAILURE_MODES.md).
+
+## Data
+
+`data/games.csv` is the offline fixture. This checkout cannot rebuild it. The episode dump is not in the repo, and this README does not restate an upstream license or release date.
+
+To rebuild from a dump you already have, then refresh the gold file:
+
+```bash
+.venv/bin/python tasks/build_games_from_episodes.py /path/to/episode_json_dir
+.venv/bin/python tasks/build_tasks.py
+```
+
+`build_tasks.py` overwrites `tasks/tasks.jsonl`. The labels are that script. They are not a second annotation. Column definitions for the CSV live in `tasks/build_games_from_episodes.py`.
+
+## Loop
+
+`agent_databench/loop.py` keeps a message list, calls the client with three tools, and stops on `submit_answer` or after `max_turns` (8). Tool exceptions are appended as observations, and the episode continues until one of those two stops.
+
+`read_file` may only read a file inside `data/`. `run_python` is a subprocess with a 15s timeout, a 4000-character output cap, and environment variables whose names contain `KEY`, `TOKEN`, `SECRET`, or `PASSWORD` removed. It is not a security boundary.
+
+## Tests and counts
+
+| What | Count | Locked by |
 |---|---|---|
-| max_turns 不收敛 | 工具报错被当成"重试信号"死循环 | 报错回喂时附带第 n 次提示，n≥2 直接终止 |
-| 数值对但差 10 倍 | DictReader 列全是字符串，模型忘了 cast | tool_hints 变体专治这个，A/B 见真章 |
-| 幻觉列名 | 没先 read_file 就盲写代码 | 系统 prompt 要求首轮必须 inspect |
-| 统计脚本把每局全记成"有动作" | episode 动作是嵌套结构 `{farmer:[], hands:[[]], market:[]}`，扁平比较漏掉 list 套 list | 递归展平后再判 PASS；测试用真实局结构 |
+| Gold questions | 20 | `tasks/tasks.jsonl`, `TASK_COUNT` in `tasks/build_tasks.py`, pytest |
+| Fixture data rows | 40 | `data/games.csv`, pytest |
+| CI command | `python -m pytest tests/ -q` | `.github/workflows/ci.yml`, README, CONTRIBUTING |
 
-## 待办
-
-- [ ] 跑 base vs tool_hints 各 20 题 × 2 遍（留噪声底），把对比表贴进本 README
-- [ ] 记录一个真实抓到的 agent 层 bug 进失败模式表
+The fake end-to-end test runs all 20 questions. Adding a test does not require an edit to CI. Changing the gold file without `build_tasks.py`, or changing the pytest command in only one of the README, CONTRIBUTING, and the workflow, fails the drift tests.

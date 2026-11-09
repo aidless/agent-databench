@@ -1,4 +1,11 @@
-"""Tool definitions + dispatch. Paths are confined to the repo's data/ dir."""
+"""Tool definitions + dispatch.
+
+read_file stays inside data/. run_python does not: it is a subprocess in a
+temp directory that holds a copy of data/ and nothing else. Absolute paths
+can still read the rest of the machine. See FAILURE_MODES.md.
+"""
+import shutil
+import tempfile
 from pathlib import Path
 
 from .sandbox import run_python
@@ -11,8 +18,9 @@ TOOL_SPECS = [
         "type": "function",
         "function": {
             "name": "run_python",
-            "description": "Run python code in a sandbox (15s timeout, output capped). "
-                           "Use it to load data/games.csv with the csv module or pandas and compute the answer.",
+            "description": "Run python in a subprocess (15s timeout, output capped). "
+                           "The working directory contains data/games.csv. "
+                           "Load it with the csv module or pandas and compute the answer.",
             "parameters": {
                 "type": "object",
                 "properties": {"code": {"type": "string", "description": "python source to execute"}},
@@ -48,17 +56,20 @@ TOOL_SPECS = [
 
 
 def read_data_file(path: str) -> str:
-    target = (DATA_DIR / path).resolve()
-    if not str(target).startswith(str(DATA_DIR)) or not target.is_file():
+    root = DATA_DIR.resolve()
+    # An absolute `path` drops `root` on join. is_relative_to still rejects it.
+    # startswith(root) would accept a sibling such as data_backup/.
+    target = (root / path).resolve()
+    if not target.is_relative_to(root) or not target.is_file():
         raise ValueError(f"path escapes data/ or missing: {path!r}")
     return target.read_text()
 
 
 def dispatch(name: str, args: dict) -> dict:
     if name == "run_python":
-        # cwd at repo root so 'data/games.csv' resolves; see sandbox.py for
-        # what is and isn't contained.
-        return run_python(args["code"], cwd=str(REPO_ROOT))
+        with tempfile.TemporaryDirectory(prefix="databench-ws-") as workspace:
+            shutil.copytree(DATA_DIR, Path(workspace) / "data")
+            return run_python(args["code"], cwd=workspace)
     if name == "read_file":
         try:
             return {"ok": True, "content": read_data_file(args["path"])}
