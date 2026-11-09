@@ -1,5 +1,7 @@
 # agent-databench
 
+[![CI](https://github.com/aidless/agent-databench/actions/workflows/ci.yml/badge.svg)](https://github.com/aidless/agent-databench/actions/workflows/ci.yml)
+
 一个**带评测 harness 的 CSV 数据分析 agent**：手写 tool-calling 循环（不依赖
 agent 框架），20 个有标准答案的任务，每次改动都能量出「通过率 / 轮数 / token
 成本」三个数。
