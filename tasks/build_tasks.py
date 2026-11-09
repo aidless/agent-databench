@@ -1,10 +1,12 @@
-"""Generate tasks.jsonl: questions + answers computed directly from the CSV.
+"""Generate tasks.jsonl from data/games.csv.
 
-Answers are never hand-typed — the script is the single source of truth,
-so the eval set can't silently rot when data changes.
-Schema: official Kaggriculture episode dumps flattened by
-build_games_from_episodes.py (money/win/pass/act columns per seat).
+Answers are this script's outputs, not a separate annotation. Re-run it
+when the CSV changes and commit the new jsonl with it. The drift test
+fails if the file and build() diverge.
+
+Non-float rows store tol 0. The scorer still has a 1e-9 floor.
 """
+
 import csv
 import json
 import statistics
@@ -13,6 +15,7 @@ from pathlib import Path
 
 NUM = ("seed", "act_timeout_s", "money_a", "money_b", "pass_turns_a",
        "pass_turns_b", "act_turns_a", "act_turns_b")
+TASK_COUNT = 20
 
 
 def load_rows(path):
@@ -40,6 +43,14 @@ def build(rows):
     t = []
 
     def add(qid, question, answer, kind="float", tol=0.01):
+        if kind == "int":
+            as_int = int(round(float(answer)))
+            if abs(float(answer) - as_int) > 1e-9:
+                raise ValueError(f"{qid} is not an integer value: {answer}")
+            answer = as_int
+            tol = 0.0
+        elif kind != "float":
+            tol = 0.0
         t.append({"id": qid, "question": question, "answer": answer, "kind": kind, "tol": tol})
 
     margin = [r["money_a"] - r["money_b"] for r in rows]
@@ -81,7 +92,7 @@ if __name__ == "__main__":
     root = Path(__file__).resolve().parent.parent
     rows = load_rows(root / "data" / "games.csv")
     tasks = build(rows)
-    assert len(tasks) == 20, f"expected 20 tasks, got {len(tasks)}"
+    assert len(tasks) == TASK_COUNT, f"expected {TASK_COUNT} tasks, got {len(tasks)}"
     out = root / "tasks" / "tasks.jsonl"
     with open(out, "w") as f:
         for task in tasks:

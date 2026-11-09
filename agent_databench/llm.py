@@ -34,6 +34,11 @@ class FakeLLM:
         return {"prompt_tokens": 0, "completion_tokens": 0}
 
 
+def configured_model() -> str:
+    """Live model id. A missing or blank LLM_MODEL uses deepseek-chat."""
+    return (os.environ.get("LLM_MODEL") or "").strip() or "deepseek-chat"
+
+
 class OpenAICompatLLM:
     name = "openai-compat"
 
@@ -43,7 +48,7 @@ class OpenAICompatLLM:
             api_key=os.environ["LLM_API_KEY"],
             base_url=os.environ.get("LLM_BASE_URL") or None,
         )
-        self.model = os.environ.get("LLM_MODEL", "deepseek-chat")
+        self.model = configured_model()
         self._usage = {"prompt_tokens": 0, "completion_tokens": 0}
 
     @property

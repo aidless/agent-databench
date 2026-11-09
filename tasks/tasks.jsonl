@@ -1,20 +1,20 @@
-{"id": "t01", "question": "How many games are in this dataset?", "answer": 40, "kind": "int", "tol": 0.01}
+{"id": "t01", "question": "How many games are in this dataset?", "answer": 40, "kind": "int", "tol": 0.0}
 {"id": "t02", "question": "Mean final money for seat a", "answer": 102850.88, "kind": "float", "tol": 0.01}
 {"id": "t03", "question": "Mean final money for seat b", "answer": 104064.88, "kind": "float", "tol": 0.01}
 {"id": "t04", "question": "Mean money difference, seat a minus seat b", "answer": -1214.0, "kind": "float", "tol": 0.01}
 {"id": "t05", "question": "Median final money for seat a", "answer": 99737.0, "kind": "float", "tol": 0.01}
-{"id": "t06", "question": "How many games did seat a win? (winner column says 'a')", "answer": 17, "kind": "int", "tol": 0.01}
-{"id": "t07", "question": "How many games ended in a tie? (winner column 'tie')", "answer": 0, "kind": "int", "tol": 0.01}
+{"id": "t06", "question": "How many games did seat a win? (winner column says 'a')", "answer": 17, "kind": "int", "tol": 0.0}
+{"id": "t07", "question": "How many games ended in a tie? (winner column 'tie')", "answer": 0, "kind": "int", "tol": 0.0}
 {"id": "t08", "question": "Win rate of seat a (fraction between 0 and 1, 2 decimals)", "answer": 0.42, "kind": "float", "tol": 0.01}
 {"id": "t09", "question": "Highest single-game money across BOTH seats", "answer": 169991.0, "kind": "float", "tol": 0.5}
 {"id": "t10", "question": "Mean pass-only turns for seat a (column pass_turns_a)", "answer": 7.3, "kind": "float", "tol": 0.01}
 {"id": "t11", "question": "Mean pass-only turns for seat b", "answer": 9.47, "kind": "float", "tol": 0.01}
-{"id": "t12", "question": "Total pass-only turns across both seats all games", "answer": 671.0, "kind": "int", "tol": 0.01}
+{"id": "t12", "question": "Total pass-only turns across both seats all games", "answer": 671, "kind": "int", "tol": 0.0}
 {"id": "t13", "question": "Mean active turns for seat a (column act_turns_a)", "answer": 712.7, "kind": "float", "tol": 0.01}
 {"id": "t14", "question": "Correlation (Pearson) between pass_turns_a and money_a, 2 decimals", "answer": -0.16, "kind": "float", "tol": 0.01}
 {"id": "t15", "question": "Largest absolute money margin in one game", "answer": 21657.0, "kind": "float", "tol": 0.01}
 {"id": "t16", "question": "Mean absolute money margin", "answer": 4850.5, "kind": "float", "tol": 0.01}
-{"id": "t17", "question": "How many games did seat a finish above $100,000?", "answer": 20, "kind": "int", "tol": 0.01}
-{"id": "t18", "question": "How many games had seat a pass-only turns above 5?", "answer": 21, "kind": "int", "tol": 0.01}
+{"id": "t17", "question": "How many games did seat a finish above $100,000?", "answer": 20, "kind": "int", "tol": 0.0}
+{"id": "t18", "question": "How many games had seat a pass-only turns above 5?", "answer": 21, "kind": "int", "tol": 0.0}
 {"id": "t19", "question": "Mean seed value of the games", "answer": 1077115946.58, "kind": "float", "tol": 1.0}
-{"id": "t20", "question": "Which seat has the higher mean money overall? answer 'a' or 'b'", "answer": "b", "kind": "str", "tol": 0.01}
+{"id": "t20", "question": "Which seat has the higher mean money overall? answer 'a' or 'b'", "answer": "b", "kind": "str", "tol": 0.0}

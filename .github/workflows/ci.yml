@@ -10,5 +10,6 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+      # Offline suite only: no API key and no live model.
       - run: pip install -r requirements.txt
       - run: python -m pytest tests/ -q
