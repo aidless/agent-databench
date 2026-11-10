@@ -49,6 +49,20 @@ cp .env.example .env                          # 填任意 OpenAI 兼容端点
 .venv/bin/python run.py --config configs/variant_tool_hints.yaml
 ```
 
+## Results（真实数字，如实标注）
+
+| 结果 | 数字 | 证据 | 能否进能力声明 |
+|---|---|---|---|
+| 管道自检（`--fake` 回放，base 配置） | **20/20 通过，每题 2 轮，0 token** | `results/base-fake.jsonl`（`llm: fake` 标记） | **否**——只验证 loop/沙箱/判分接线 |
+| 管道自检（`--fake --limit 3` 复跑） | `base / fake / 3题 / 100.0% / 2.0轮 / 0 token`，尾部打印 `NOTE: --fake validates plumbing only; not a capability result.` | 2026-11-10 实跑输出 | **否**（同上） |
+| 单测 | 7 passed | `python3 -m pytest tests/ -q`（2026-11-10 实跑） | —（工程正确性） |
+| **base vs tool_hints A/B（各 20 题 × 2 遍）** | **未跑** | 无真实 LLM 端点可用；`results/` 里没有任何带真实 `llm:` 标记的结果行 | — |
+
+A/B 缺口如实记录：`configs/base.yaml` 与 `configs/variant_tool_hints.yaml` 的唯一
+差异是 `tool_hints: false → true`（diff 已核），对比表设计就绪，但没有可用端点时
+不产出任何"通过率/轮数/token"对比数字——`--fake` 回放的 100% 不是能力，不能
+替代 A/B。此缺口对应下方待办第 1 条，保持未勾选。
+
 ## 诚实性约束（评测纪律）
 
 - `--fake` 是**管道回放**：脚本直接提交标准答案，仅验证 loop/沙箱/判分接线，
@@ -66,6 +80,14 @@ cp .env.example .env                          # 填任意 OpenAI 兼容端点
 | 数值对但差 10 倍 | DictReader 列全是字符串，模型忘了 cast | tool_hints 变体专治这个，A/B 见真章 |
 | 幻觉列名 | 没先 read_file 就盲写代码 | 系统 prompt 要求首轮必须 inspect |
 | 统计脚本把每局全记成"有动作" | episode 动作是嵌套结构 `{farmer:[], hands:[[]], market:[]}`，扁平比较漏掉 list 套 list | 递归展平后再判 PASS；测试用真实局结构 |
+
+## Limits
+
+- **无真实 LLM 结果**：本仓所有已提交结果行都是 `llm: fake` 管道回放；base vs
+  tool_hints 的 A/B 对比表在拿到真实 OpenAI 兼容端点前无法产出（NOT_FILLABLE）。
+- 沙箱是进程级约束（超时/截断/脱敏），不是安全边界——防失控刷爆够用，防恶意代码不够。
+- 20 题任务集来自单一数据源（40 局 CC0 episode 转储），结论外推到其他 CSV 任务域
+  没有任何证据。
 
 ## 待办
 
