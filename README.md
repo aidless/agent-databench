@@ -1,5 +1,7 @@
 # agent-databench
 
+> **English TL;DR**: A CSV data-analysis agent with a hand-written tool-calling loop and a programmatic scoring harness; the 20 gold-answer tasks are generated from a committed 40-row CC0 game dump. Every committed result is an offline `--fake` plumbing replay (no model calls), and the real-LLM A/B comparison between `base` and `tool_hints` is **NOT YET MEASURED** because no compatible endpoint is available.
+
 [![CI](https://github.com/aidless/agent-databench/actions/workflows/ci.yml/badge.svg)](https://github.com/aidless/agent-databench/actions/workflows/ci.yml)
 
 一个**带评测 harness 的 CSV 数据分析 agent**：手写 tool-calling 循环（不依赖
@@ -93,3 +95,46 @@ A/B 缺口如实记录：`configs/base.yaml` 与 `configs/variant_tool_hints.yam
 
 - [ ] 跑 base vs tool_hints 各 20 题 × 2 遍（留噪声底），把对比表贴进本 README
 - [ ] 记录一个真实抓到的 agent 层 bug 进失败模式表
+
+## U1 results and reproducibility (recomputed 2026-11-11)
+
+All numbers below were recomputed from committed files in this repository at the
+time of the U1 content pass; no external ledger or remembered value was used.
+
+| Recomputed result | Value | Source (path:line) | Method |
+|---|---|---|---|
+| `data/games.csv` rows | 40 | `data/games.csv:1-41` | `csv.DictReader`, header + data rows |
+| `data/games.csv` columns | 12 | `data/games.csv:1` | `episode_id, seed, act_timeout_s, team_a, team_b, money_a, money_b, winner, pass_turns_a, pass_turns_b, act_turns_a, act_turns_b` |
+| Committed result lines | 20 | `results/base-fake.jsonl:1-20` | count of JSONL lines |
+| Lines with `passed: true` | 20/20 | `results/base-fake.jsonl:1-20` | sum of boolean `passed` |
+| LLM marker on every line | fake | `results/base-fake.jsonl:1-20` | distinct `llm` values |
+| Turns per line | 2 | `results/base-fake.jsonl:1-20` | distinct `turns` values |
+| Prompt / completion tokens | 0 / 0 | `results/base-fake.jsonl:1-20` | sum of `prompt_tokens`, `completion_tokens` |
+
+**Quickstart command actually executed for this pass** (offline, zero dependencies):
+
+```bash
+python3 run.py --fake --limit 3
+# [PASS] t01 turns=2 gold=40 got='40' ... t03 turns=2
+# | base | fake | 3 | 100.0% | 2.0 | 0 | 0 |
+# NOTE: --fake validates plumbing only; not a capability result.
+```
+
+That smoke run rewrites `results/base-fake.jsonl` with 3 lines; the committed
+20-line version was restored with `git checkout -- results/base-fake.jsonl`
+before this README was staged, so this commit changes documentation only.
+
+**NOT YET MEASURED**: the `configs/base.yaml` vs `configs/variant_tool_hints.yaml`
+A/B run (20 tasks x 2 repeats per config). It needs a real OpenAI-compatible
+endpoint; `--fake` replays are plumbing checks and are never reported as
+capability. Reproduce once an endpoint exists:
+
+```bash
+python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
+.venv/bin/python tasks/build_tasks.py
+cp .env.example .env   # fill any OpenAI-compatible endpoint
+.venv/bin/python run.py --config configs/base.yaml
+.venv/bin/python run.py --config configs/variant_tool_hints.yaml
+```
+
+<!-- figure: pending real measurement -->
