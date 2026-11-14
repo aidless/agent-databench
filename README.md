@@ -209,3 +209,43 @@ cp .env.example .env   # fill any OpenAI-compatible endpoint
 ```
 
 <!-- figure: pending real measurement -->
+
+## 验收标准与复算
+
+**判据**：本仓判为合格的条件是 `python3 eval/run_cases.py` 通过率必须为 100%（20/20），且 `make eval` 退出码必须为 0；任何一条失败即判为不合格。
+
+题库 `eval/cases.jsonl` 共 20 条，每条形如 `id/axis/question/expected/mode/verify/source`，其中 17 条是 `expr`（真调本仓 API / 真解析 `data/games.csv`、`tasks/tasks.jsonl`、`results/base-fake.jsonl`），2 条 `doc`（核对 README 自己的声明），1 条 `doc` 边界声明。期望值全部由脚本现场算出并固化，不抄文档。
+
+| axis | 条数 | 考什么 |
+|---|---|---|
+| scoring/tolerance | 3 | `score_answer` 的 tol 边界（42.0±0.01 的通过/拒绝）、`kind=str` 大小写与空白无关 |
+| data/csv | 3 | `games.csv` 行数 40、seat a 均值 102850.88、表头 12 列 |
+| tasks/schema | 2 | `tasks.jsonl` 20 行且每行恰好五键、id 唯一；t20 的 `kind=str` 且 gold 属于 {a,b} |
+| tasks/regeneration | 2 | `build_tasks.build` 从 CSV 重建的 20 条与已提交文件逐条相等、id 为 t01..t20 |
+| tools/read_file | 2 | `../tasks/build_tasks.py` 越权读被拒且报 escapes；`games.csv` 首行表头正确 |
+| sandbox | 3 | sleep(3) 在 timeout=1 下 timed_out；`*TOKEN*` 环境变量被剥离；20000 字符输出被截断并带标记 |
+| loop | 3 | FakeLLM 端到端 submitted/2 轮/判分通过；不调工具 → max_turns；未知工具作为 observation 回喂后仍可 submit |
+| results/replay | 1 | `base-fake.jsonl` 20 行、20 passed、20 个 task、全标 `llm: fake` |
+| docs/claims | 1 | README 明确写了「进程级约束、不是安全边界」 |
+
+```bash
+python3 eval/run_cases.py                 # 逐条 PASS/FAIL，末行 20/20 cases passed
+python3 eval/run_cases.py --save          # 同上，并重建 eval/run-report.json
+python3 eval/run_cases.py --selftest      # 篡改 DB-01 期望值，必须变红（19/20）
+```
+
+**数字如何复算**：每题的 `verify` 就是复算代码本身——它现场执行本仓函数或重算 CSV，再与 `expected` 比对；`eval/run-report.json` 逐条记 `id/axis/ok/detail` 与 `failed_by_axis`，重跑 `--save` 即重建。所以「20/20」不是抄来的常量：改一行 `scoring.py`/`sandbox.py`/`build_tasks.py`，对应题目立刻变红。`--selftest` 是这套题的非空性反证（篡改一条必须 19/20）。
+
+**失败归因**：`run_cases.py` 失败时按 axis 汇总，格式为 `<axis>: <n> 条 —— <ID 列表>`，并按下面的映射定位模块：
+
+| 失败的 axis | 对应模块 |
+|---|---|
+| scoring/tolerance | `agent_databench/scoring.py`（判分容差/类型分支） |
+| tools/read_file | `agent_databench/tools.py`（data/ 越权拦截） |
+| sandbox | `agent_databench/sandbox.py`（超时/截断/环境变量脱敏） |
+| loop | `agent_databench/loop.py` + `agent_databench/llm.py`（轮数上限、工具错误回喂） |
+| data/csv、tasks/* | `data/games.csv`、`tasks/build_tasks.py`、`tasks/tasks.jsonl`（数据或生成脚本漂移） |
+| results/replay | `results/base-fake.jsonl`（提交的回放结果被改写） |
+| docs/claims | `README.md`（声明与实现不一致） |
+
+`make eval` 同时跑本题库与既有 7 项 pytest；两者都过才返回 0。

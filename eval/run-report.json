@@ -1,0 +1,129 @@
+{
+ "total": 20,
+ "passed": 20,
+ "failed": 0,
+ "selftest": false,
+ "failed_by_axis": {},
+ "results": [
+  {
+   "id": "DB-01",
+   "axis": "scoring/tolerance",
+   "ok": true,
+   "detail": "True"
+  },
+  {
+   "id": "DB-02",
+   "axis": "scoring/tolerance",
+   "ok": true,
+   "detail": "False"
+  },
+  {
+   "id": "DB-03",
+   "axis": "scoring/tolerance",
+   "ok": true,
+   "detail": "True"
+  },
+  {
+   "id": "DB-04",
+   "axis": "data/csv",
+   "ok": true,
+   "detail": "40"
+  },
+  {
+   "id": "DB-05",
+   "axis": "data/csv",
+   "ok": true,
+   "detail": "102850.88"
+  },
+  {
+   "id": "DB-06",
+   "axis": "data/csv",
+   "ok": true,
+   "detail": "12"
+  },
+  {
+   "id": "DB-07",
+   "axis": "tasks/schema",
+   "ok": true,
+   "detail": "True"
+  },
+  {
+   "id": "DB-08",
+   "axis": "tasks/schema",
+   "ok": true,
+   "detail": "True"
+  },
+  {
+   "id": "DB-09",
+   "axis": "tasks/regeneration",
+   "ok": true,
+   "detail": "True"
+  },
+  {
+   "id": "DB-10",
+   "axis": "tasks/regeneration",
+   "ok": true,
+   "detail": "True"
+  },
+  {
+   "id": "DB-11",
+   "axis": "tools/read_file",
+   "ok": true,
+   "detail": "True"
+  },
+  {
+   "id": "DB-12",
+   "axis": "tools/read_file",
+   "ok": true,
+   "detail": "True"
+  },
+  {
+   "id": "DB-13",
+   "axis": "sandbox",
+   "ok": true,
+   "detail": "True"
+  },
+  {
+   "id": "DB-14",
+   "axis": "sandbox",
+   "ok": true,
+   "detail": "True"
+  },
+  {
+   "id": "DB-15",
+   "axis": "sandbox",
+   "ok": true,
+   "detail": "True"
+  },
+  {
+   "id": "DB-16",
+   "axis": "loop",
+   "ok": true,
+   "detail": "True"
+  },
+  {
+   "id": "DB-17",
+   "axis": "loop",
+   "ok": true,
+   "detail": "True"
+  },
+  {
+   "id": "DB-18",
+   "axis": "loop",
+   "ok": true,
+   "detail": "True"
+  },
+  {
+   "id": "DB-19",
+   "axis": "results/replay",
+   "ok": true,
+   "detail": "True"
+  },
+  {
+   "id": "DB-20",
+   "axis": "docs/claims",
+   "ok": true,
+   "detail": "沙箱是**进程级**约束（超时/截断/脱敏），**不是**安全边界"
+  }
+ ]
+}
