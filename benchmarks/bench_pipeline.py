@@ -12,7 +12,6 @@ Usage: python benchmarks/bench_pipeline.py
 Exit: 0 only if tests pass AND 20/20 replay passes, else 1.
 """
 import json
-import os
 import subprocess
 import sys
 from pathlib import Path

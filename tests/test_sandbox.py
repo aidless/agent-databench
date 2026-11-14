@@ -1,4 +1,3 @@
-import os
 
 from agent_databench.sandbox import run_python, MAX_OUTPUT
 
